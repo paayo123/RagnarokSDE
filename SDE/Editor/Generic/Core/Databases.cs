@@ -1446,6 +1446,13 @@ namespace SDE.Editor.Generic.Core {
 				GTabsMaker.PrintGrid(ref line, 3, 1, 2, new DefaultIndexProvider(ServerHomunAttributes.EnHp.Index, 16), -1, 0, -1, 0, settings.GeneralProperties, settings.Gdb.AttributeList);
 			};
 			DbWriter = DbIOMethods.DbWriterComma;
+			
+//////////////////////
+			// --- Disable loading homunculus db entirely ---
+			ThrowFileNotFoundException = false;      // อย่าโยน Exception แม้ไม่มีไฟล์
+			DbLoader = (debug, db) => { /* no-op */ }; // ไม่ทำอะไรเวลา loader ถูกเรียก
+/////////////////////
+			
 			TabGenerator.OnSetCustomCommands += delegate(GDbTabWrapper<int, ReadableTuple<int>> tab, GTabSettings<int, ReadableTuple<int>> settings, BaseDb gdb) {
 				settings.AddedCommands.Add(new GItemCommand<int, ReadableTuple<int>> {
 					Visibility = gdb.DbSource == ServerDbs.Homuns ? Visibility.Visible : Visibility.Collapsed,
@@ -1459,6 +1466,13 @@ namespace SDE.Editor.Generic.Core {
 				});
 			};
 		}
+		
+		// ข้ามขั้นตอนโหลดทั้งหมด (แม้มีไฟล์ก็ไม่อ่าน)
+		protected override void _loadDb() {
+			Table.Clear();
+			return;
+		}
+		
 	}
 
 	public class DbHomuns2 : DbHomuns {
