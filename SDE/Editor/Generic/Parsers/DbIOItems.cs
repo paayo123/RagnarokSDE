@@ -322,8 +322,26 @@ namespace SDE.Editor.Generic.Parsers {
 							(!Boolean.Parse((item["Trade.NoAuction"] ?? "false")) ? 0 : (1 << 8))
 							).ToString(CultureInfo.InvariantCulture));
 
-						table.SetRaw(itemId, ServerItemAttributes.Script, item["CharmScript"] ?? item["Script"] ?? "");
-						var charmMaxObj = item["CharmUpgradeMaxEffect"];  // ParserObject หรือ null
+                        // --- Collection flags + script (read from Flags.*, fallback top-level) ---
+                        var _col     = Boolean.Parse((item["Flags.Collection"] ?? item["Collection"] ?? "false"));
+                        var _colStack= Boolean.Parse((item["Flags.CollectionStack"] ?? item["CollectionStack"] ?? "false"));
+                        if (_col && _colStack) _col = false; // prefer stack if both are true
+
+                        table.SetRaw(itemId, ServerItemAttributes.Collection,       _col ? "true" : "false");
+                        table.SetRaw(itemId, ServerItemAttributes.CollectionStack,  _col ? "false" : (_colStack ? "true" : "false"));
+                        // EffectStack is TOP-LEVEL by spec
+                        table.SetRaw(itemId, ServerItemAttributes.CollectionEffectStack, item["CollectionEffectStack"] ?? "1");
+
+                        if (_col || _colStack) {
+                            table.SetRaw(itemId, ServerItemAttributes.CollectionScript, item["CollectionScript"] ?? "");
+                            table.SetRaw(itemId, ServerItemAttributes.Script, ""); // avoid double write
+                        } else {
+                            table.SetRaw(itemId, ServerItemAttributes.Script, item["CharmScript"] ?? item["Script"] ?? "");
+                            table.SetRaw(itemId, ServerItemAttributes.CollectionScript, "");
+                        }
+
+                        var charmMaxObj = item["CharmUpgradeMaxEffect"];  // ParserObject หรือ null
+
 						if (charmMaxObj != null) {
 							var charmMaxStr = (string)charmMaxObj;       // แปลงแบบปลอดภัย
 							if (!string.IsNullOrEmpty(charmMaxStr)) {
@@ -456,9 +474,25 @@ namespace SDE.Editor.Generic.Parsers {
 							(!Boolean.Parse((item["Trade.NoAuction"] ?? "false")) ? 0 : (1 << 8))
 							).ToString(CultureInfo.InvariantCulture));
 
-                        table.SetRaw(itemId, ServerItemAttributes.Script, item["CharmScript"] ?? item["Script"] ?? "");
-						table.SetRaw(itemId, ServerItemAttributes.OnEquipScript, item["OnEquipScript"] ?? "");
-						table.SetRaw(itemId, ServerItemAttributes.OnUnequipScript, item["OnUnequipScript"] ?? "");
+                        // --- Collection flags + script (mutually exclusive) ---
+                        var _col2 = Boolean.Parse((item["Collection"] ?? "false"));
+                        var _colStack2 = Boolean.Parse((item["CollectionStack"] ?? "false"));
+                        if (_col2 && _colStack2) _col2 = false;
+
+                        table.SetRaw(itemId, ServerItemAttributes.Collection, _col2 ? "true" : "false");
+                        table.SetRaw(itemId, ServerItemAttributes.CollectionStack, _col2 ? "false" : (_colStack2 ? "true" : "false"));
+                        table.SetRaw(itemId, ServerItemAttributes.CollectionEffectStack, item["CollectionEffectStack"] ?? "1");
+
+                        if (_col2 || _colStack2) {
+                            table.SetRaw(itemId, ServerItemAttributes.CollectionScript, item["CollectionScript"] ?? "");
+                            table.SetRaw(itemId, ServerItemAttributes.Script, "");
+                        } else {
+                            table.SetRaw(itemId, ServerItemAttributes.Script, item["CharmScript"] ?? item["Script"] ?? "");
+                            table.SetRaw(itemId, ServerItemAttributes.CollectionScript, "");
+                        }
+
+                        table.SetRaw(itemId, ServerItemAttributes.OnEquipScript, item["OnEquipScript"] ?? "");
+                        table.SetRaw(itemId, ServerItemAttributes.OnUnequipScript, item["OnUnequipScript"] ?? "");
 					}
 					catch (Exception err) {
 						ErrorHandler.HandleException(err);
@@ -1044,24 +1078,42 @@ namespace SDE.Editor.Generic.Parsers {
 					builder.AppendLine("    AliasName: " + DbIOUtils.Id2Name(itemDb, ServerItemAttributes.AegisName, valueS));
 				}
 
-				if ((value = tuple.GetValue<int>(ServerItemAttributes.Flags)) != 0 || tuple.GetValue<int>(ServerItemAttributes.DropEffect) != 0) {
-					DbIOUtils.ExpandFlag<ItemFlagType>(builder, tuple, "Flags", ServerItemAttributes.Flags, YamlParser.Indent4, YamlParser.Indent6, 
-						() => tuple.GetValue<int>(ServerItemAttributes.DropEffect) != 0,
-						delegate {
-							DropEffectType effect = (DropEffectType)tuple.GetValue<int>(ServerItemAttributes.DropEffect);
+                // --- compute collection flags for FLAGS block ---
+                var __colst_forFlags = tuple.GetValue<bool>(ServerItemAttributes.CollectionStack);
+                var __csc_forFlags   = tuple.GetValue<string>(ServerItemAttributes.CollectionScript);
+                var __col_ui         = tuple.GetValue<bool>(ServerItemAttributes.Collection); // UI may be removed but keep for safety
+                bool __col_forFlags  = !__colst_forFlags && (__col_ui || (!string.IsNullOrEmpty(__csc_forFlags) && __csc_forFlags != "{}"));
 
-							switch(effect) {
-								case DropEffectType.Client: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("CLIENT"); break;
-								case DropEffectType.White_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("WHITE_PILLAR"); break;
-								case DropEffectType.Blue_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("BLUE_PILLAR"); break;
-								case DropEffectType.Yellow_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("YELLOW_PILLAR"); break;
-								case DropEffectType.Purple_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("PURPLE_PILLAR"); break;
-								case DropEffectType.Orange_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("ORANGE_PILLAR"); break;
-								case DropEffectType.Green_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("GREEN_PILLAR"); break;
-								case DropEffectType.Red_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("RED_PILLAR"); break;
-							}
-						});
-				}
+                // Open Flags block if base flags OR dropeffect OR collection flags exist
+                if ((value = tuple.GetValue<int>(ServerItemAttributes.Flags)) != 0 ||
+                    tuple.GetValue<int>(ServerItemAttributes.DropEffect) != 0 ||
+                    __col_forFlags || __colst_forFlags) {
+                    DbIOUtils.ExpandFlag<ItemFlagType>(builder, tuple, "Flags", ServerItemAttributes.Flags, YamlParser.Indent4, YamlParser.Indent6,
+                        // extra-condition: have dropeffect OR collection flags
+                        () => tuple.GetValue<int>(ServerItemAttributes.DropEffect) != 0 || __col_forFlags || __colst_forFlags,
+                        delegate {
+                            // write DropEffect if any
+                            if (tuple.GetValue<int>(ServerItemAttributes.DropEffect) != 0) {
+                                DropEffectType effect = (DropEffectType)tuple.GetValue<int>(ServerItemAttributes.DropEffect);
+                                switch (effect) {
+                                    case DropEffectType.Client:        builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("CLIENT"); break;
+                                    case DropEffectType.White_Pillar:  builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("WHITE_PILLAR"); break;
+                                    case DropEffectType.Blue_Pillar:   builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("BLUE_PILLAR"); break;
+                                    case DropEffectType.Yellow_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("YELLOW_PILLAR"); break;
+                                    case DropEffectType.Purple_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("PURPLE_PILLAR"); break;
+                                    case DropEffectType.Orange_Pillar: builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("ORANGE_PILLAR"); break;
+                                    case DropEffectType.Green_Pillar:  builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("GREEN_PILLAR"); break;
+                                    case DropEffectType.Red_Pillar:    builder.Append(YamlParser.Indent6); builder.Append("DropEffect: "); builder.AppendLine("RED_PILLAR"); break;
+                                }
+                            }
+                            // write collection flags (mutual-exclusive; prefer Stack)
+                            if (__colst_forFlags) {
+                                builder.AppendLine("      CollectionStack: true");
+                            } else if (__col_forFlags) {
+                                builder.AppendLine("      Collection: true");
+                            }
+                        });
+                }
 
 				if ((value = tuple.GetValue<int>(ServerItemAttributes.Delay)) != 0) {
 					builder.AppendLine("    Delay:");
@@ -1103,12 +1155,28 @@ namespace SDE.Editor.Generic.Parsers {
 					if ((value & (1 << 8)) == (1 << 8)) builder.AppendLine("      NoAuction: true");
 				}
 
-				if ((valueS = tuple.GetValue<string>(ServerItemAttributes.Script)) != "" && valueS != "{}") {
-					var t = tuple.GetValue<int>(ServerItemAttributes.Type);
-					var useCharmKey = (t == (int)TypeType.Charm) || (t == (int)TypeType.Charm_Upgrade);
-					builder.AppendLine(useCharmKey ? "    CharmScript: |" : "    Script: |");
-					builder.AppendLine(DbIOFormatting.ScriptFormatYaml(valueS, "      "));
-				}
+                // --- Collection extras (no extra Flags block here) ---
+                var __colst = tuple.GetValue<bool>(ServerItemAttributes.CollectionStack);
+                var __csc   = tuple.GetValue<string>(ServerItemAttributes.CollectionScript);
+                var __eff   = (tuple.GetValue<string>(ServerItemAttributes.CollectionEffectStack) ?? "").Trim();
+                // non-stack if CollectionScript present but not ticking stack
+                bool __col  = !__colst && (!string.IsNullOrEmpty(__csc) && __csc != "{}");
+
+                // ---- write CollectionEffectStack at TOP-LEVEL (outside Flags) ----
+                if (!string.IsNullOrEmpty(__eff) && __eff != "1")
+                    builder.AppendLine("    CollectionEffectStack: " + __eff);
+
+                // ---- write CollectionScript (block scalar) OR fallback to Script/CharmScript ----
+                if (!string.IsNullOrEmpty(__csc) && __csc != "{}") {
+                    builder.AppendLine("    CollectionScript: |");
+                    builder.AppendLine(DbIOFormatting.ScriptFormatYaml(__csc, "      "));
+                } else if ((valueS = tuple.GetValue<string>(ServerItemAttributes.Script)) != "" && valueS != "{}") {
+                    var t = tuple.GetValue<int>(ServerItemAttributes.Type);
+                    var useCharmKey = (t == (int)TypeType.Charm) || (t == (int)TypeType.Charm_Upgrade);
+                    builder.AppendLine(useCharmKey ? "    CharmScript: |" : "    Script: |");
+                    builder.AppendLine(DbIOFormatting.ScriptFormatYaml(valueS, "      "));
+                }
+
 				if ((valueS = tuple.GetValue<string>(ServerItemAttributes.OnEquipScript)) != "" && valueS != "{}") {
 					builder.AppendLine("    EquipScript: |");
 					builder.AppendLine(DbIOFormatting.ScriptFormatYaml(valueS, "      "));

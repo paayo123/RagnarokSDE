@@ -340,8 +340,8 @@ namespace SDE.Editor.Generic.Core {
 					ServerItemAttributes.ClassNumber.Index, 1, ServerItemAttributes.Script.Index, 1,
 					ServerItemAttributes.OnEquipScript.Index, 1, ServerItemAttributes.OnUnequipScript.Index, 1,
 					ServerItemAttributes.AliasName.Index, 1, ServerItemAttributes.DropEffect.Index, 1,
-+					ServerItemAttributes.Flags.Index, 1, ServerItemAttributes.CharmUpgradeMaxEffect.Index, 1,
-+					ServerItemAttributes.CustomFlags.Index, 1,
+					ServerItemAttributes.Flags.Index, 1, ServerItemAttributes.CharmUpgradeMaxEffect.Index, 1,
+					ServerItemAttributes.CustomFlags.Index, 1,
 					ServerItemAttributes.MHFlags.Index, 1, ServerItemAttributes.MHMaxUses.Index, 1,
 				}), generalProperties, list);
 
@@ -379,12 +379,15 @@ namespace SDE.Editor.Generic.Core {
 					ServerItemAttributes.Defense.Index, 1, ServerItemAttributes.Range.Index, 1,
 					ServerItemAttributes.NumberOfSlots.Index, 1, ServerItemAttributes.ApplicableJob.Index, 1,
 					ServerItemAttributes.Upper.Index, 1, ServerItemAttributes.Gender.Index, 1,
-					ServerItemAttributes.Location.Index, 1, ServerItemAttributes.WeaponLevel.Index, 1,
-					ServerItemAttributes.EquipLevelMin.Index, 1, ServerItemAttributes.Refineable.Index, 1,
-					ServerItemAttributes.ClassNumber.Index, 1, ServerItemAttributes.Script.Index, 1,
+                    ServerItemAttributes.Location.Index, 1, ServerItemAttributes.WeaponLevel.Index, 1,
+                    ServerItemAttributes.EquipLevelMin.Index, 1, ServerItemAttributes.Refineable.Index, 1,
+                    ServerItemAttributes.CollectionStack.Index, 1,
+                    ServerItemAttributes.ClassNumber.Index, 1, ServerItemAttributes.Script.Index, 1,
+                    ServerItemAttributes.CollectionScript.Index, 1,
 					ServerItemAttributes.OnEquipScript.Index, 1, ServerItemAttributes.OnUnequipScript.Index, 1,
-					ServerItemAttributes.AliasName.Index, 1, ServerItemAttributes.Flags.Index, 1,
-					ServerItemAttributes.CharmUpgradeMaxEffect.Index, 1
+                    ServerItemAttributes.AliasName.Index, 1, ServerItemAttributes.Flags.Index, 1,
+                    ServerItemAttributes.CharmUpgradeMaxEffect.Index, 1,
+                    ServerItemAttributes.CollectionEffectStack.Index, 1
 				}), generalProperties, list);
 
 				generalProperties.AddCustomProperty(new QueryItemDroppedBy<int, ReadableTuple<int>>(line, 0, 2, 2));
@@ -426,8 +429,11 @@ namespace SDE.Editor.Generic.Core {
 				}), -1, 0, -1, 0, generalProperties, list);
 
 				line++;
-				generalProperties.AddLabel(ServerItemAttributes.CharmUpgradeMaxEffect,  line, 3);
-				generalProperties.AddProperty(ServerItemAttributes.CharmUpgradeMaxEffect, line, 4);
+                generalProperties.AddLabel(ServerItemAttributes.CharmUpgradeMaxEffect,  line, 3);
+                generalProperties.AddProperty(ServerItemAttributes.CharmUpgradeMaxEffect, line, 4);
+                // place CollectionEffectStack next to CharmUpgradeMaxEffect
+                generalProperties.AddLabel(ServerItemAttributes.CollectionEffectStack,  line, 5);
+                generalProperties.AddProperty(ServerItemAttributes.CollectionEffectStack, line, 6);
 
 				line++;
 				generalProperties.AddCustomProperty(new QueryItemDroppedBy<int, ReadableTuple<int>>(line, 0, 2, 2));
