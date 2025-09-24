@@ -237,6 +237,8 @@ namespace SDE.Editor.Generic.Lists {
 		[Description("Usable with delayed consumption")] UsableWithDelayed = 11,
 		[Description("Shadow equipment")] ShadowEquip = 12,
 		[Description("Cash")] UsableWithDelayed2 = 18,
+		[Description("Charm")] Charm = 19,
+		[Description("Charm Upgrade")] Charm_Upgrade = 20,					
 	}
 
 	public enum GenderType {

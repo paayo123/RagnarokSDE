@@ -340,7 +340,8 @@ namespace SDE.Editor.Generic.Core {
 					ServerItemAttributes.ClassNumber.Index, 1, ServerItemAttributes.Script.Index, 1,
 					ServerItemAttributes.OnEquipScript.Index, 1, ServerItemAttributes.OnUnequipScript.Index, 1,
 					ServerItemAttributes.AliasName.Index, 1, ServerItemAttributes.DropEffect.Index, 1,
-					ServerItemAttributes.Flags.Index, 1, ServerItemAttributes.CustomFlags.Index, 1,
++					ServerItemAttributes.Flags.Index, 1, ServerItemAttributes.CharmUpgradeMaxEffect.Index, 1,
++					ServerItemAttributes.CustomFlags.Index, 1,
 					ServerItemAttributes.MHFlags.Index, 1, ServerItemAttributes.MHMaxUses.Index, 1,
 				}), generalProperties, list);
 
@@ -382,7 +383,8 @@ namespace SDE.Editor.Generic.Core {
 					ServerItemAttributes.EquipLevelMin.Index, 1, ServerItemAttributes.Refineable.Index, 1,
 					ServerItemAttributes.ClassNumber.Index, 1, ServerItemAttributes.Script.Index, 1,
 					ServerItemAttributes.OnEquipScript.Index, 1, ServerItemAttributes.OnUnequipScript.Index, 1,
-					ServerItemAttributes.AliasName.Index, 1, ServerItemAttributes.Flags.Index, 1
+					ServerItemAttributes.AliasName.Index, 1, ServerItemAttributes.Flags.Index, 1,
+					ServerItemAttributes.CharmUpgradeMaxEffect.Index, 1
 				}), generalProperties, list);
 
 				generalProperties.AddCustomProperty(new QueryItemDroppedBy<int, ReadableTuple<int>>(line, 0, 2, 2));
@@ -393,7 +395,7 @@ namespace SDE.Editor.Generic.Core {
 					ServerItemAttributes.StackAmount.Index, ServerItemAttributes.StackFlags.Index, 
 					ServerItemAttributes.Delay.Index, ServerItemAttributes.DelayStatus.Index,
 				}), -1, 0, -1, 0, generalProperties, list);
-
+				
 				generalProperties.SetRow(line, new GridLength(1, GridUnitType.Star));
 
 				tab.TabChanged();
@@ -416,7 +418,6 @@ namespace SDE.Editor.Generic.Core {
 					ServerItemAttributes.Weight.Index, 16
 				}), generalProperties, list);
 
-				generalProperties.AddCustomProperty(new QueryItemDroppedBy<int, ReadableTuple<int>>(line, 0, 2, 2));
 
 				GTabsMaker.PrintGrid(ref line, 3, 1, 2, new SpecifiedIndexProvider(new[] {
 					ServerItemAttributes.TradeFlag.Index, ServerItemAttributes.NoUseFlag.Index,
@@ -424,6 +425,12 @@ namespace SDE.Editor.Generic.Core {
 					ServerItemAttributes.Delay.Index, ServerItemAttributes.DelayStatus.Index,
 				}), -1, 0, -1, 0, generalProperties, list);
 
+				line++;
+				generalProperties.AddLabel(ServerItemAttributes.CharmUpgradeMaxEffect,  line, 3);
+				generalProperties.AddProperty(ServerItemAttributes.CharmUpgradeMaxEffect, line, 4);
+
+				line++;
+				generalProperties.AddCustomProperty(new QueryItemDroppedBy<int, ReadableTuple<int>>(line, 0, 2, 2));
 				generalProperties.SetRow(line, new GridLength(1, GridUnitType.Star));
 
 				GTabsMaker.PrintGrid(ref line, 3, 1, 2, new SpecifiedIndexProvider(new[] {

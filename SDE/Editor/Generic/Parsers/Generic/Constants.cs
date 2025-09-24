@@ -200,6 +200,8 @@ namespace SDE.Editor.Generic.Parsers.Generic {
 			_set(TypeType.UsableWithDelayed, "Delayconsume");
 			_set(TypeType.ShadowEquip, "Shadowgear");
 			_set(TypeType.UsableWithDelayed2, "Cash");
+			_set(TypeType.Charm, "Charm");
+			_set(TypeType.Charm_Upgrade, "Charm_Upgrade"); 
 			_makeDico<TypeType>();
 
 			//_set(ItemFlagType.BindOnEquip, "BindOnEquip");

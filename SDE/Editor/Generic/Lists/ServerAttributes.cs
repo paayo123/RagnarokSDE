@@ -37,6 +37,7 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly DbAttribute Matk = new ServerItemAttributes(new DbAttribute("Matk", typeof(string), "", "Matk"));
 		public static readonly DbAttribute Delay = new ServerItemAttributes(new DbAttribute("Delay", typeof(string), "", "Delay")) { Description = "Delay after using the item (in milliseconds)." };
 		public static readonly DbAttribute DelayStatus = new ServerItemAttributes(new DbAttribute("Status", typeof(string), "", "Status")) { Description = "Status Change used to track delay. (Default: None)" };
+		public static readonly DbAttribute CharmUpgradeMaxEffect = new ServerItemAttributes( new DbAttribute("CharmUpgradeMaxEffect", typeof(int), 1, "CharmUpgradeMaxEffect")) { DataConverter = ValueConverters.GetSetZeroString };																																																							   
 		public static readonly DbAttribute Stack = new ServerItemAttributes(new DbAttribute("Stack", typeof(string), "[]", "Stack")) { DataConverter = ValueConverters.GetScriptNoBracketsSetScriptWithBracketsSqure, Description = "[amount, type]\r\namount: The maximum amount of items that can be stacked.\r\ntype (mask): \r\n1 = Character inventory\r\n2 = Character cart\r\n4 = Account storage\r\n8 = Guild storage" };
 		public static readonly DbAttribute Sprite = new ServerItemAttributes(new DbAttribute("Sprite", typeof(SpriteRedirect), "", "Sprite ID")) { Description = "Redirects the item's sprite (client side) for this one instead.", Visibility = VisibleState.Hidden | VisibleState.ForceShow };
 

@@ -42,6 +42,8 @@ namespace SDE.Editor.Generic.Parsers {
 			typeFlags["delayconsume"] = 11;
 			typeFlags["shadowgear"] = 12;
 			typeFlags["cash"] = 18;
+            typeFlags["charm"] = 19;
+            typeFlags["charm_upgrade"] = 20;
 
 			var weaponFlags = new Dictionary<string, long>();
 			weaponFlags["fist"] = 0x0;
@@ -320,7 +322,14 @@ namespace SDE.Editor.Generic.Parsers {
 							(!Boolean.Parse((item["Trade.NoAuction"] ?? "false")) ? 0 : (1 << 8))
 							).ToString(CultureInfo.InvariantCulture));
 
-						table.SetRaw(itemId, ServerItemAttributes.Script, item["Script"] ?? "");
+						table.SetRaw(itemId, ServerItemAttributes.Script, item["CharmScript"] ?? item["Script"] ?? "");
+						var charmMaxObj = item["CharmUpgradeMaxEffect"];  // ParserObject หรือ null
+						if (charmMaxObj != null) {
+							var charmMaxStr = (string)charmMaxObj;       // แปลงแบบปลอดภัย
+							if (!string.IsNullOrEmpty(charmMaxStr)) {
+								table.SetRaw(itemId, ServerItemAttributes.CharmUpgradeMaxEffect, charmMaxStr);
+							}
+						}
 						table.SetRaw(itemId, ServerItemAttributes.OnEquipScript, item["EquipScript"] ?? "");
 						table.SetRaw(itemId, ServerItemAttributes.OnUnequipScript, item["UnEquipScript"] ?? "");
 					}
@@ -447,7 +456,7 @@ namespace SDE.Editor.Generic.Parsers {
 							(!Boolean.Parse((item["Trade.NoAuction"] ?? "false")) ? 0 : (1 << 8))
 							).ToString(CultureInfo.InvariantCulture));
 
-						table.SetRaw(itemId, ServerItemAttributes.Script, item["Script"] ?? "");
+                        table.SetRaw(itemId, ServerItemAttributes.Script, item["CharmScript"] ?? item["Script"] ?? "");
 						table.SetRaw(itemId, ServerItemAttributes.OnEquipScript, item["OnEquipScript"] ?? "");
 						table.SetRaw(itemId, ServerItemAttributes.OnUnequipScript, item["OnUnequipScript"] ?? "");
 					}
@@ -761,6 +770,8 @@ namespace SDE.Editor.Generic.Parsers {
 									case 3:
 									case 6:
 									case 10: // Etc
+                                    case 19: // Charm
+                                    case 20: // Charm_Upgrade
 										linesEquip.Delete(key);
 										linesEtc.Write(key, b.ToString().Trim('\r', '\n'));
 										linesUsable.Delete(key);
@@ -806,11 +817,10 @@ namespace SDE.Editor.Generic.Parsers {
 				int value;
 				bool valueB;
 				string valueS;
-				int type = 0;
+                int type = tuple.GetValue<int>(ServerItemAttributes.Type);
 
-				type = value = tuple.GetValue<int>(ServerItemAttributes.Type);
-
-				builder.AppendLine("    Type: " + Constants.ToString<TypeType>(value));
+                builder.AppendLine("    Type: " + Constants.ToString<TypeType>(type));
+                bool _isCharm = (TypeType)type == TypeType.Charm || (TypeType)type == TypeType.Charm_Upgrade;
 
 				if ((value = tuple.GetValue<int>(ServerItemAttributes.SubType)) != 0) {
 					if (type == 10) {
@@ -1026,6 +1036,10 @@ namespace SDE.Editor.Generic.Parsers {
 					builder.AppendLine("    Refineable: true");
 				}
 
+				if ((TypeType)tuple.GetValue<int>(ServerItemAttributes.Type) == TypeType.Charm_Upgrade) {
+					var mx = tuple.GetValue<int>(ServerItemAttributes.CharmUpgradeMaxEffect);
+					if (mx > 0) builder.AppendLine("    CharmUpgradeMaxEffect: " + mx);
+				}
 				if ((valueS = tuple.GetValue<string>(ServerItemAttributes.AliasName)) != "") {
 					builder.AppendLine("    AliasName: " + DbIOUtils.Id2Name(itemDb, ServerItemAttributes.AegisName, valueS));
 				}
@@ -1090,10 +1104,11 @@ namespace SDE.Editor.Generic.Parsers {
 				}
 
 				if ((valueS = tuple.GetValue<string>(ServerItemAttributes.Script)) != "" && valueS != "{}") {
-					builder.AppendLine("    Script: |");
+					var t = tuple.GetValue<int>(ServerItemAttributes.Type);
+					var useCharmKey = (t == (int)TypeType.Charm) || (t == (int)TypeType.Charm_Upgrade);
+					builder.AppendLine(useCharmKey ? "    CharmScript: |" : "    Script: |");
 					builder.AppendLine(DbIOFormatting.ScriptFormatYaml(valueS, "      "));
 				}
-
 				if ((valueS = tuple.GetValue<string>(ServerItemAttributes.OnEquipScript)) != "" && valueS != "{}") {
 					builder.AppendLine("    EquipScript: |");
 					builder.AppendLine(DbIOFormatting.ScriptFormatYaml(valueS, "      "));
@@ -1536,6 +1551,11 @@ namespace SDE.Editor.Generic.Parsers {
 			DbIOFormatting.TrySetIfDefaultEmpty(tuple, builder, ServerItemAttributes.WeaponLevel, "0");
 			DbIOFormatting.TrySetIfDefaultEmpty(tuple, builder, ServerItemAttributes.EquipLevel, "0");
 			DbIOFormatting.TrySetIfRefineable(tuple, builder, ServerItemAttributes.Refineable, true);
+			var _type = tuple.GetIntNoThrow(ServerItemAttributes.Type);
+			if (_type == (int)TypeType.Charm || _type == (int)TypeType.Charm_Upgrade) {
+				var maxEff = tuple.GetIntNoThrow(ServerItemAttributes.CharmUpgradeMaxEffect);
+				if (maxEff != 0) builder.AppendLine("    CharmUpgradeMaxEffect: " + maxEff);
+			}
 			DbIOFormatting.TrySetIfDefaultEmpty(tuple, builder, ServerItemAttributes.ClassNumber, "0");
 			DbIOFormatting.TrySetIfDefaultBoolean(tuple, builder, ServerItemAttributes.BindOnEquip, false);
 			DbIOFormatting.TrySetIfDefaultBoolean(tuple, builder, ServerItemAttributes.ForceSerial, false);
@@ -1852,6 +1872,10 @@ namespace SDE.Editor.Generic.Parsers {
 					builder.AppendLine("	Refineable: true");
 				}
 
+				if ((TypeType)tuple.GetValue<int>(ServerItemAttributes.Type) == TypeType.Charm_Upgrade) {
+					var mx = tuple.GetValue<int>(ServerItemAttributes.CharmUpgradeMaxEffect);
+					if (mx > 0) builder.AppendLine("    CharmUpgradeMaxEffect: " + mx);
+				}
 				if ((valueS = tuple.GetValue<string>(ServerItemAttributes.Sprite)) != "") {
 					builder.AppendLine("	AliasName: " + valueS);
 				}

@@ -260,6 +260,8 @@ namespace SDE.Editor.Items {
 					}
 					break;
 				case TypeType.UsableItem:
+				case TypeType.Charm:
+				case TypeType.Charm_Upgrade:
 					_autoAddPet(tupleSource, holder);
 					_autoAddWeight(tupleSource, holder);
 					_autoAddJobIfRestricted(tupleSource, holder);
