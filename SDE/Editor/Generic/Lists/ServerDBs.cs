@@ -68,8 +68,8 @@ namespace SDE.Editor.Generic.Lists {
 		public static readonly ServerDbs SkillsCast = new ServerDbs("skill_cast_db") { DisplayName = "Skill>Cast" };
 		public static readonly ServerDbs SkillsRequirement = new ServerDbs("skill_require_db") { DisplayName = "Sk. Requirements" };
 		public static readonly ServerDbs SkillsTree = new ServerDbs("skill_tree") { DisplayName = "Skill Tree" };
-		public static readonly ServerDbs Combos2 = new ServerDbs("item_combo_db2") { DisplayName = "Item Combo", AlternativeName = "import\\item_combo_db", IsImport = true };
-		public static readonly ServerDbs Combos = new ServerDbs("item_combo_db") { DisplayName = "Item Combo", AdditionalTable = Combos2 };
+		public static readonly ServerDbs Combos2 = new ServerDbs("item_combo_db2") { DisplayName = "Item Combo", SupportedFileType = FileType.Txt | FileType.Yaml, AlternativeName = "import\\item_combo_db", IsImport = true };
+		public static readonly ServerDbs Combos = new ServerDbs("item_combo_db") { DisplayName = "Item Combo", SupportedFileType = FileType.Txt | FileType.Yaml, AdditionalTable = Combos2 };
 		public static readonly ServerDbs MobSkills2 = new ServerDbs("mob_skill_db2") { DisplayName = "Mob Skills2", SupportedFileType = FileType.Txt | FileType.Sql, AlternativeName = "import\\mob_skill_db", IsImport = true };
 		public static readonly ServerDbs MobSkills = new ServerDbs("mob_skill_db") { DisplayName = "Mob Skills", SupportedFileType = FileType.Txt | FileType.Sql, AdditionalTable = MobSkills2 };
 		public static readonly ServerDbs Constants = new ServerDbs("const") { DisplayName = "Constants", UseSubPath = false, SupportedFileType = FileType.Txt | FileType.Conf, AlternativeName = "constants" };
