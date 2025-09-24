@@ -12,8 +12,6 @@ E:\Users\THIS PC\Documents\GitHub\SDE\SDE\bin\Debug\ICSharpCode.AvalonEdit.dll
 E:\Users\THIS PC\Documents\GitHub\SDE\SDE\bin\Debug\IronPython.dll
 E:\Users\THIS PC\Documents\GitHub\SDE\SDE\bin\Debug\Lua.dll
 E:\Users\THIS PC\Documents\GitHub\SDE\SDE\bin\Debug\Microsoft.Dynamic.dll
-E:\Users\THIS PC\Documents\GitHub\SDE\SDE\bin\Debug\Microsoft.Scripting.Core.dll
-E:\Users\THIS PC\Documents\GitHub\SDE\SDE\bin\Debug\Microsoft.Scripting.dll
 E:\Users\THIS PC\Documents\GitHub\SDE\SDE\bin\Debug\Org.Mentalis.Security.dll
 E:\Users\THIS PC\Documents\GitHub\SDE\SDE\bin\Debug\Tamir.SharpSSH.dll
 E:\Users\THIS PC\Documents\GitHub\SDE\SDE\bin\Debug\TokeiLibrary.dll
